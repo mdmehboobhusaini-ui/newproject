@@ -29,7 +29,7 @@ OUTPUT_DIR = os.environ.get('OUTPUT_DIR', os.path.join(os.path.dirname(os.path.a
 
 # Year range to check (auto-discovers available tabs)
 START_YEAR = 2018
-END_YEAR = datetime.now().year + 1  # Check one year ahead
+END_YEAR = datetime.now().year  # Only check up to current year
 
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -151,6 +151,16 @@ def process_year(sheet_id, year):
     if not results:
         print(f"  ⚠ No valid data in tab '{year}'.")
         return None
+    
+    # Validate: check that dates actually belong to this year
+    # (Google Sheets returns last tab's data for non-existent tabs)
+    matching = sum(1 for r in results if r['date'].startswith(str(year)))
+    if matching == 0:
+        print(f"  ⚠ Tab '{year}' returned data but no dates match year {year}. Skipping (tab likely doesn't exist).")
+        return None
+    
+    # Filter only dates belonging to this year
+    results = [r for r in results if r['date'].startswith(str(year))]
     
     # Sort by date
     results.sort(key=lambda r: r['date'])
