@@ -23,6 +23,10 @@
   document.addEventListener('DOMContentLoaded', () => {
     initMobileNav();
     setActiveNavLink();
+    
+    // Set dynamic copyright year
+    const yearSpan = document.getElementById('current-year');
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
     const page = document.body.dataset.page;
     if (page === 'home') {
