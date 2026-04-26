@@ -189,7 +189,7 @@
     if (todayResult) {
       container.innerHTML = `
         <div class="result-card-today">
-          <div class="date-label">🏆 Today's Result</div>
+          <div class="date-label">Today's Result</div>
           <div class="date-value">${formatDate(todayResult.date)} • ${getDayName(todayResult.date)}</div>
           <div class="result-numbers">
             ${createBallsHTML(todayResult.numbers)}
@@ -202,13 +202,13 @@
       const hour = now.getHours();
       let message = '';
       if (hour < 22) {
-        message = `Today's result will be announced at <strong>10:00 PM</strong>. Stay tuned! 🕙`;
+        message = `Today's result will be announced at <strong>10:00 PM</strong>. Stay tuned!`;
       } else {
-        message = `Today's result is being updated. Please refresh in a few minutes. 🔄`;
+        message = `Today's result is being updated. Please refresh in a few minutes. `;
       }
       container.innerHTML = `
         <div class="result-card-today">
-          <div class="date-label">⏳ Awaiting Result</div>
+          <div class="date-label">Awaiting Result</div>
           <div class="date-value">${formatDate(todayStr)}</div>
           <div class="no-result-msg">${message}</div>
         </div>
@@ -244,7 +244,7 @@
 
     let tableHTML = `
       <div class="section-header">
-        <h2>📅 ${monthName} ${selectedYear} Results</h2>
+        <h2>${monthName} ${selectedYear} Results</h2>
         <p>Showing all results for the current month</p>
       </div>
       <div class="results-table-wrapper">
@@ -378,7 +378,7 @@
     if (results.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="icon">📭</div>
+          <div class="icon"></div>
           <p>No results for this period.</p>
         </div>
       `;
@@ -450,7 +450,7 @@
     if (el) {
       el.innerHTML = `
         <div class="empty-state">
-          <div class="icon">⚠️</div>
+          <div class="icon"></div>
           <p>${msg}</p>
         </div>
       `;
