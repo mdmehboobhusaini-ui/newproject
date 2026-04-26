@@ -578,9 +578,6 @@ ul, ol { list-style: none; }
 }
 
 @media (max-width: 480px) {
-  .results-table .day-col {
-    display: none;
-  }
   .results-table td {
     padding: 10px;
   }
