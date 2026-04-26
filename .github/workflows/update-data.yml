@@ -8,6 +8,9 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
 
@@ -22,11 +25,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Fetch latest data from Google Sheet
         env:
-          SHEET_ID: ${{ secrets.SHEET_ID }}
           OUTPUT_DIR: ./data
         run: |
           python scripts/fetch_data.py
