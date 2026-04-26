@@ -252,7 +252,7 @@
           <thead>
             <tr>
               <th>Date</th>
-              <th>Day</th>
+              <th class="day-col">Day</th>
               <th>Result Numbers</th>
             </tr>
           </thead>
@@ -402,7 +402,7 @@
           <thead>
             <tr>
               <th>Date</th>
-              <th>Day</th>
+              <th class="day-col">Day</th>
               <th>Result Numbers</th>
             </tr>
           </thead>
