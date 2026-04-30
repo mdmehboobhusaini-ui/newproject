@@ -1,5 +1,6 @@
 /* ============================================
    TEEN MINAR - Main Application JavaScript
+   teenminar.com / teenminar.in
    ============================================ */
 
 (function () {
@@ -126,7 +127,7 @@
       d.getFullYear() === today.getFullYear();
   }
 
-  // ---- Create Result Balls HTML ----
+  // ---- Create Number Balls HTML ----
   function createBallsHTML(numbers, mini = false) {
     const cls = mini ? 'mini-ball' : 'result-ball';
     return numbers.map(n => `<span class="${cls}">${n}</span>`).join('');
@@ -157,8 +158,8 @@
       return;
     }
 
-    renderTodayResult();
-    renderMonthResults();
+    renderLatestNumbers();
+    renderMonthNumbers();
     renderQuickYears(m.years);
   }
 
@@ -170,20 +171,21 @@
     statsEl.innerHTML = `
       <div class="stat-item">
         <div class="stat-number">${yearsCount}</div>
-        <div class="stat-label">Years Data</div>
+        <div class="stat-label">Years Archived</div>
       </div>
       <div class="stat-item">
-        <div class="stat-number">Daily</div>
-        <div class="stat-label">Updates</div>
+        <div class="stat-number">7</div>
+        <div class="stat-label">Daily Numbers</div>
       </div>
       <div class="stat-item">
-        <div class="stat-number">10 PM</div>
-        <div class="stat-label">Result Time</div>
+        <div class="stat-number">Free</div>
+        <div class="stat-label">Always</div>
       </div>
     `;
   }
 
-  function renderTodayResult() {
+  // Show the LATEST available numbers (today's if available, otherwise the most recent)
+  function renderLatestNumbers() {
     const container = document.getElementById('today-result-container');
     if (!container || !currentYearData) return;
 
@@ -191,41 +193,46 @@
     const todayResult = currentYearData.results.find(r => r.date === todayStr);
 
     if (todayResult) {
+      // Today's numbers are available
       container.innerHTML = `
         <div class="result-card-today">
-          <div class="date-label">Today's Result</div>
-          <div class="date-value">${formatDate(todayResult.date)} • ${getDayName(todayResult.date)}</div>
+          <div class="date-label">Today's Numbers</div>
+          <div class="date-value">${formatDate(todayResult.date)} - ${getDayName(todayResult.date)}</div>
           <div class="result-numbers">
             ${createBallsHTML(todayResult.numbers)}
           </div>
         </div>
       `;
     } else {
-      // Check if result time hasn't passed yet
-      const now = new Date();
-      const hour = now.getHours();
-      let message = '';
-      if (hour < 22) {
-        message = `Today's result will be announced at <strong>10:00 PM</strong>. Stay tuned!`;
+      // Today's numbers not yet published — show the LATEST available numbers
+      const sorted = [...currentYearData.results].sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (sorted.length > 0) {
+        const latest = sorted[0];
+        container.innerHTML = `
+          <div class="result-card-today">
+            <div class="date-label">Latest Numbers</div>
+            <div class="date-value">${formatDate(latest.date)} - ${getDayName(latest.date)}</div>
+            <div class="result-numbers">
+              ${createBallsHTML(latest.numbers)}
+            </div>
+          </div>
+        `;
       } else {
-        message = `Today's result is being updated. Please refresh in a few minutes. `;
+        container.innerHTML = `
+          <div class="result-card-today">
+            <div class="no-result-msg">No numbers published yet for this year. Please check back later.</div>
+          </div>
+        `;
       }
-      container.innerHTML = `
-        <div class="result-card-today">
-          <div class="date-label">Awaiting Result</div>
-          <div class="date-value">${formatDate(todayStr)}</div>
-          <div class="no-result-msg">${message}</div>
-        </div>
-      `;
     }
   }
 
-  function renderMonthResults() {
+  function renderMonthNumbers() {
     const container = document.getElementById('month-results-container');
     if (!container || !currentYearData) return;
 
-    // Filter results for current month
-    const monthResults = currentYearData.results.filter(r => {
+    // Filter numbers for current month
+    const monthNumbers = currentYearData.results.filter(r => {
       const d = new Date(r.date + 'T00:00:00');
       return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
     });
@@ -233,23 +240,28 @@
     // Month header
     const monthName = MONTHS[selectedMonth];
 
-    if (monthResults.length === 0) {
+    // Check if today is missing — add "Upcoming" row
+    const todayStr = getTodayString();
+    const todayExists = monthNumbers.some(r => r.date === todayStr);
+    const todayInMonth = new Date().getMonth() === selectedMonth && new Date().getFullYear() === selectedYear;
+
+    if (monthNumbers.length === 0 && !todayInMonth) {
       container.innerHTML = `
         <div class="section-header">
-          <h2>${monthName} ${selectedYear} Results</h2>
-          <p>No results available for this month yet.</p>
+          <h2>${monthName} ${selectedYear} - Teen Minar Numbers</h2>
+          <p>No numbers published for this month yet.</p>
         </div>
       `;
       return;
     }
 
     // Sort by date descending (latest first)
-    monthResults.sort((a, b) => new Date(b.date) - new Date(a.date));
+    monthNumbers.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     let tableHTML = `
       <div class="section-header">
-        <h2>${monthName} ${selectedYear} Results</h2>
-        <p>Showing all results for the current month</p>
+        <h2>${monthName} ${selectedYear} - Teen Minar Numbers</h2>
+        <p>Daily random numbers published this month</p>
       </div>
       <div class="results-table-wrapper">
         <table class="results-table">
@@ -257,13 +269,24 @@
             <tr>
               <th>Date</th>
               <th class="day-col">Day</th>
-              <th>Result Numbers</th>
+              <th>Numbers</th>
             </tr>
           </thead>
           <tbody>
     `;
 
-    monthResults.forEach(r => {
+    // If today's numbers are not yet published AND today is in this month, show "Upcoming" row at top
+    if (todayInMonth && !todayExists) {
+      tableHTML += `
+        <tr style="opacity: 0.5;">
+          <td class="date-col">${formatDate(todayStr)}</td>
+          <td class="day-col">${getDayName(todayStr)}</td>
+          <td><em>Upcoming (10 PM - 10 AM)</em></td>
+        </tr>
+      `;
+    }
+
+    monthNumbers.forEach(r => {
       const todayClass = isToday(r.date) ? 'today-row' : '';
       tableHTML += `
         <tr class="${todayClass}">
@@ -382,8 +405,7 @@
     if (results.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="icon"></div>
-          <p>No results for this period.</p>
+          <p>No numbers published for this period.</p>
         </div>
       `;
       return;
@@ -393,13 +415,13 @@
     results.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const title = selectedMonth === -1
-      ? `All Results - ${selectedYear}`
-      : `${MONTHS[selectedMonth]} ${selectedYear} Results`;
+      ? `Teen Minar - ${selectedYear} Numbers`
+      : `Teen Minar - ${MONTHS[selectedMonth]} ${selectedYear} Numbers`;
 
     let html = `
       <div class="section-header">
         <h2>${title}</h2>
-        <p>${results.length} results found</p>
+        <p>${results.length} entries found</p>
       </div>
       <div class="results-table-wrapper">
         <table class="results-table">
@@ -407,7 +429,7 @@
             <tr>
               <th>Date</th>
               <th class="day-col">Day</th>
-              <th>Result Numbers</th>
+              <th>Numbers</th>
             </tr>
           </thead>
           <tbody>
@@ -443,7 +465,7 @@
       el.innerHTML = `
         <div class="loading">
           <div class="spinner"></div>
-          <p>Loading results...</p>
+          <p>Loading numbers...</p>
         </div>
       `;
     }
@@ -454,7 +476,6 @@
     if (el) {
       el.innerHTML = `
         <div class="empty-state">
-          <div class="icon"></div>
           <p>${msg}</p>
         </div>
       `;
